@@ -45,6 +45,7 @@ import org.jeecg.common.aspect.annotation.AutoLog;
 public class VisitinfoController extends JeecgController<Visitinfo, IVisitinfoService> {
 	@Autowired
 	private IVisitinfoService visitinfoService;
+	@Autowired
 	private UploadService uploadService;
 
 	 @RequestMapping("/uploadinfo")
@@ -57,7 +58,7 @@ public class VisitinfoController extends JeecgController<Visitinfo, IVisitinfoSe
 		 JSON.toJSONString(jsonObj,serializeConfig,filter);
 
 		 MultipartFile file = BASE64DecodedMultipartFile.base64ToMultipart(jsonObj.get("file").toString());
-		 JSONObject result = uploadService.uploadInfo(visitinfo,file,"/Users/macpro/Desktop/imgs");
+		 JSONObject result = uploadService.uploadInfo(file,"/Users/macpro/Desktop/imgs");
 		 if (result.get("messageCode").equals("1")){
 			 Visitinfo visit= new Visitinfo();
 			 visit.setVisitedname(jsonObj.getString("visitedname"));
@@ -72,7 +73,7 @@ public class VisitinfoController extends JeecgController<Visitinfo, IVisitinfoSe
 			 visit.setImgurl(result.getString("imgUrl"));
 			 visit.setStatus("0");//待确认
 
-			 visitinfoService.createVisit(visit);
+			 visitinfoService.save(visit);
 		 }
 		 return JSONObject.toJSONString(result.remove("imgUrl"));
 	 }

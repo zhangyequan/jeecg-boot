@@ -10,7 +10,7 @@ import java.util.UUID;
 @Service
 public class UploadService {
 
-    public JSONObject uploadInfo(String visitinfo, MultipartFile file, String uploadDir) {
+    public JSONObject uploadInfo(MultipartFile file, String uploadDir) {
         JSONObject object = new JSONObject();
         try {
             //图片路径
