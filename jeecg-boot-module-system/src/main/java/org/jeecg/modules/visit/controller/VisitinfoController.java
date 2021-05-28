@@ -50,7 +50,7 @@ public class VisitinfoController extends JeecgController<Visitinfo, IVisitinfoSe
 
 	 @RequestMapping("/uploadinfo")
 	 @ResponseBody
-	 public String uploadInfo(@RequestParam("visitinfo")String visitinfo) {
+	 public Result<?> uploadInfo(@RequestParam("visitinfo")String visitinfo) {
 		 ValueFilter filter = new DateValueFilter();
 		 SerializeConfig serializeConfig = new SerializeConfig();
 		 serializeConfig.put(Date.class,new SimpleDateFormatSerializer("yyyy-MM-dd HH:mm:ss"));
@@ -75,7 +75,7 @@ public class VisitinfoController extends JeecgController<Visitinfo, IVisitinfoSe
 
 			 visitinfoService.save(visit);
 		 }
-		 return JSONObject.toJSONString(result.remove("imgUrl"));
+		 return Result.OK("添加成功！");
 	 }
 	
 	/**
