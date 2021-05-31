@@ -1,5 +1,8 @@
 package org.jeecg.modules.visit.controller;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
@@ -50,13 +53,8 @@ public class VisitinfoController extends JeecgController<Visitinfo, IVisitinfoSe
 
 	 @RequestMapping("/uploadinfo")
 	 @ResponseBody
-	 public Result<?> uploadInfo(@RequestParam("visitinfo")String visitinfo) {
-		 ValueFilter filter = new DateValueFilter();
-		 SerializeConfig serializeConfig = new SerializeConfig();
-		 serializeConfig.put(Date.class,new SimpleDateFormatSerializer("yyyy-MM-dd HH:mm:ss"));
+	 public Result<?> uploadInfo(@RequestBody String visitinfo) throws UnsupportedEncodingException {
 		 JSONObject jsonObj = JSONObject.parseObject(visitinfo);
-		 JSON.toJSONString(jsonObj,serializeConfig,filter);
-
 		 MultipartFile file = BASE64DecodedMultipartFile.base64ToMultipart(jsonObj.get("file").toString());
 		 JSONObject result = uploadService.uploadInfo(file,"/Users/macpro/Desktop/imgs");
 		 if (result.get("messageCode").equals("1")){
