@@ -5,6 +5,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -20,6 +21,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 
+import org.jeecg.modules.system.entity.SysUser;
 import org.jeecg.modules.visit.entity.Visitinfo;
 import org.jeecg.modules.visit.service.IVisitinfoService;
 import org.jeecg.modules.visit.service.impl.UploadService;
@@ -88,16 +90,18 @@ public class VisitinfoController extends JeecgController<Visitinfo, IVisitinfoSe
 	@AutoLog(value = "visitinfo-分页列表查询")
 	@ApiOperation(value="visitinfo-分页列表查询", notes="visitinfo-分页列表查询")
 	@GetMapping(value = "/list")
-	public Result<?> queryPageList(Visitinfo visitinfo,
-								   @RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
-								   @RequestParam(name="pageSize", defaultValue="10") Integer pageSize,
-								   HttpServletRequest req) {
-		QueryWrapper<Visitinfo> queryWrapper = QueryGenerator.initQueryWrapper(visitinfo, req.getParameterMap());
+	public Result<IPage<Visitinfo>> queryPageList(@RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
+											   @RequestParam(name="pageSize", defaultValue="10") Integer pageSize,
+											   @RequestParam(name="status", defaultValue="") String status,
+											   HttpServletRequest req) {
+		Result<IPage<Visitinfo>> result = new Result<IPage<Visitinfo>>();
 		Page<Visitinfo> page = new Page<Visitinfo>(pageNo, pageSize);
-		IPage<Visitinfo> pageList = visitinfoService.page(page, queryWrapper);
-		return Result.OK(pageList);
+		IPage<Visitinfo> pageList = visitinfoService.getByStatus(page, status);
+		result.setSuccess(true);
+		result.setResult(pageList);
+		return result;
 	}
-	
+
 	/**
 	 *   添加
 	 *

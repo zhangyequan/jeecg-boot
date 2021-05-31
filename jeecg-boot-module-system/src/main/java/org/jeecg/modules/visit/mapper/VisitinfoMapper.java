@@ -1,6 +1,8 @@
 package org.jeecg.modules.visit.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.jeecg.modules.visit.entity.Visitinfo;
 
 /**
@@ -11,6 +13,6 @@ import org.jeecg.modules.visit.entity.Visitinfo;
  */
 public interface VisitinfoMapper extends BaseMapper<Visitinfo> {
 
-    void createvisit(Visitinfo visitinfo);
+    IPage<Visitinfo> getByStatus(Page<Visitinfo> page, String status);
 
 }
