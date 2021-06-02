@@ -57,7 +57,6 @@ public class VisitinfoController extends JeecgController<Visitinfo, IVisitinfoSe
 	private UploadService uploadService;
 
 	 @RequestMapping("/uploadinfo")
-	 @ResponseBody
 	 public Result<?> uploadInfo(@RequestBody String visitinfo) throws UnsupportedEncodingException, ParseException {
 		 JSONObject jsonObj = JSONObject.parseObject(visitinfo);
 		 MultipartFile file = BASE64DecodedMultipartFile.base64ToMultipart(jsonObj.get("file").toString());
@@ -81,11 +80,31 @@ public class VisitinfoController extends JeecgController<Visitinfo, IVisitinfoSe
 		 }
 		 return Result.OK("添加成功！");
 	 }
+
+	 /**
+	  *   审批
+	  *
+	  * @param info
+	  * @return
+	  */
+	 @AutoLog(value = "visitinfo-审批")
+	 @ApiOperation(value="visitinfo-审批", notes="visitinfo-审批")
+	 @PostMapping(value = "/approve")
+	 public Result<?> approve(@RequestBody String info) {
+		 JSONObject jsonObj = JSONObject.parseObject(info);
+		 int change = visitinfoService.approve(jsonObj.getString("id"));
+		 if(change == 1){
+			 return Result.OK("审批成功！");
+		 }else{
+			 return Result.error("审批失败！");
+		 }
+
+	 }
 	
 	/**
 	 * 分页列表查询
 	 *
-	 * @param visitinfo
+	 * @param status
 	 * @param pageNo
 	 * @param pageSize
 	 * @param req

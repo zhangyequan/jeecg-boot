@@ -2,6 +2,7 @@ package org.jeecg.modules.visit.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.visit.entity.Visitinfo;
 
 /**
@@ -13,4 +14,5 @@ import org.jeecg.modules.visit.entity.Visitinfo;
 public interface IVisitinfoService extends IService<Visitinfo> {
 
     public IPage<Visitinfo> getByStatus(Page<Visitinfo> page, String status);
+    public int approve(String id);
 }

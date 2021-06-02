@@ -8,4 +8,9 @@
             </if>
     </select>
 
+    <update id="approve">
+        update visitinfo set status="1"
+            where id = #{id}
+    </update>
+
 </mapper>

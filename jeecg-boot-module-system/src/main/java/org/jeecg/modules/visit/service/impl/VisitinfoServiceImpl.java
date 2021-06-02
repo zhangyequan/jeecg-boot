@@ -1,6 +1,7 @@
 package org.jeecg.modules.visit.service.impl;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.visit.mapper.VisitinfoMapper;
 import org.jeecg.modules.visit.service.IVisitinfoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,5 +25,10 @@ public class VisitinfoServiceImpl extends ServiceImpl<VisitinfoMapper, Visitinfo
     @Override
     public IPage<Visitinfo> getByStatus(Page<Visitinfo> page, String status) {
         return visitinfoMapper.getByStatus(page, status);
+    }
+
+    @Override
+    public int approve(String id) {
+        return visitinfoMapper.approve(id);
     }
 }
