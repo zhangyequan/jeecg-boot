@@ -3,6 +3,9 @@ package org.jeecg.modules.visit.controller;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -55,11 +58,11 @@ public class VisitinfoController extends JeecgController<Visitinfo, IVisitinfoSe
 
 	 @RequestMapping("/uploadinfo")
 	 @ResponseBody
-	 public Result<?> uploadInfo(@RequestBody String visitinfo) throws UnsupportedEncodingException {
+	 public Result<?> uploadInfo(@RequestBody String visitinfo) throws UnsupportedEncodingException, ParseException {
 		 JSONObject jsonObj = JSONObject.parseObject(visitinfo);
 		 MultipartFile file = BASE64DecodedMultipartFile.base64ToMultipart(jsonObj.get("file").toString());
 		 JSONObject result = uploadService.uploadInfo(file,"/Users/macpro/Desktop/imgs");
-		 if (result.get("messageCode").equals("1")){
+		 if (result.get("messageCode").equals("1")){//如果处理成功
 			 Visitinfo visit= new Visitinfo();
 			 visit.setVisitedname(jsonObj.getString("visitedname"));
 			 visit.setVisitedpnum(jsonObj.getString("visitedpnum"));
@@ -71,7 +74,8 @@ public class VisitinfoController extends JeecgController<Visitinfo, IVisitinfoSe
 			 visit.setPlatenum(jsonObj.getString("platenum"));
 			 visit.setVisitorpnum(jsonObj.getString("visitorpnum"));
 			 visit.setImgurl(result.getString("imgUrl"));
-			 visit.setStatus(jsonObj.getString("status"));//待确认
+			 visit.setStatus("0");//待确认
+			 visit.setCreatetime(new Date());
 
 			 visitinfoService.save(visit);
 		 }

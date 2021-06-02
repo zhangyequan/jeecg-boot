@@ -84,9 +84,9 @@ public class Visitinfo implements Serializable {
     @ApiModelProperty(value = "status")
     private String status;
     /**createtime*/
-    @Excel(name = "create_time", width = 15, format = "yyyy-MM-dd")
+    @Excel(name = "createtime", width = 15, format = "yyyy-MM-dd")
     @JsonFormat(timezone = "GMT+8",pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern="yyyy-MM-dd")
-    @ApiModelProperty(value = "create_time")
-    private Date create_time;
+    @ApiModelProperty(value = "create_ime")
+    private Date createtime;
 }
