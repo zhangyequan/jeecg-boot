@@ -2,11 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.jeecg.modules.visit.mapper.VisitinfoMapper">
     <select id="getByStatus" resultType="org.jeecg.modules.visit.entity.Visitinfo">
-        select * from visitinfo where
+        select * from visitinfo
             <if test="status!=null  and status!=''">
-                status = #{status} and
+               where status = #{status}
             </if>
-         1=1
     </select>
 
 </mapper>

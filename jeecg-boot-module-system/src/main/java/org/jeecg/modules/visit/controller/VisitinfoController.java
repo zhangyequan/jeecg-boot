@@ -71,7 +71,7 @@ public class VisitinfoController extends JeecgController<Visitinfo, IVisitinfoSe
 			 visit.setPlatenum(jsonObj.getString("platenum"));
 			 visit.setVisitorpnum(jsonObj.getString("visitorpnum"));
 			 visit.setImgurl(result.getString("imgUrl"));
-			 visit.setStatus("0");//待确认
+			 visit.setStatus(jsonObj.getString("status"));//待确认
 
 			 visitinfoService.save(visit);
 		 }
