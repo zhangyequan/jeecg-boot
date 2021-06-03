@@ -56,9 +56,9 @@ public class VisitinfoController extends JeecgController<Visitinfo, IVisitinfoSe
 	@Autowired
 	private UploadService uploadService;
 
-	 @RequestMapping("/uploadinfo")
-	 public Result<?> uploadInfo(@RequestBody String visitinfo) throws UnsupportedEncodingException, ParseException {
-		 JSONObject jsonObj = JSONObject.parseObject(visitinfo);
+	 @PostMapping("/uploadinfo")
+	 public Result<?> uploadInfo(@RequestBody String params) throws UnsupportedEncodingException, ParseException {
+		 JSONObject jsonObj = JSONObject.parseObject(params);
 		 MultipartFile file = BASE64DecodedMultipartFile.base64ToMultipart(jsonObj.get("file").toString());
 		 JSONObject result = uploadService.uploadInfo(file,"/Users/macpro/Desktop/imgs");
 		 if (result.get("messageCode").equals("1")){//如果处理成功
@@ -84,14 +84,14 @@ public class VisitinfoController extends JeecgController<Visitinfo, IVisitinfoSe
 	 /**
 	  *   审批
 	  *
-	  * @param info
+	  * @param params
 	  * @return
 	  */
 	 @AutoLog(value = "visitinfo-审批")
 	 @ApiOperation(value="visitinfo-审批", notes="visitinfo-审批")
 	 @PostMapping(value = "/approve")
-	 public Result<?> approve(@RequestBody String info) {
-		 JSONObject jsonObj = JSONObject.parseObject(info);
+	 public Result<?> approve(@RequestBody String params) {
+		 JSONObject jsonObj = JSONObject.parseObject(params);
 		 int change = visitinfoService.approve(jsonObj.getString("id"));
 		 if(change == 1){
 			 return Result.OK("审批成功！");
@@ -104,22 +104,17 @@ public class VisitinfoController extends JeecgController<Visitinfo, IVisitinfoSe
 	/**
 	 * 分页列表查询
 	 *
-	 * @param status
-	 * @param pageNo
-	 * @param pageSize
-	 * @param req
+	 * @param params
 	 * @return
 	 */
 	@AutoLog(value = "visitinfo-分页列表查询")
 	@ApiOperation(value="visitinfo-分页列表查询", notes="visitinfo-分页列表查询")
-	@GetMapping(value = "/list")
-	public Result<IPage<Visitinfo>> queryPageList(@RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
-											   @RequestParam(name="pageSize", defaultValue="10") Integer pageSize,
-											   @RequestParam(name="status", defaultValue="") String status,
-											   HttpServletRequest req) {
+	@PostMapping(value = "/list")
+	public Result<IPage<Visitinfo>> queryPageList(@RequestBody String params ) {
+		JSONObject jsonObj = JSONObject.parseObject(params);
 		Result<IPage<Visitinfo>> result = new Result<IPage<Visitinfo>>();
-		Page<Visitinfo> page = new Page<Visitinfo>(pageNo, pageSize);
-		IPage<Visitinfo> pageList = visitinfoService.getByStatus(page, status);
+		Page<Visitinfo> page = new Page<Visitinfo>(jsonObj.getLong("pageNo"), jsonObj.getLong("pageSize"));
+		IPage<Visitinfo> pageList = visitinfoService.getByStatus(page, jsonObj.getString("status"));
 		result.setSuccess(true);
 		result.setResult(pageList);
 		return result;
