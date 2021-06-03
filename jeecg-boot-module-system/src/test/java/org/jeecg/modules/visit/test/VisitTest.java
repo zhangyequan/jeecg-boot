@@ -65,7 +65,41 @@ public class VisitTest {
         params.put("visitorpnum","45454");
         params.put("identitynum","34343");
         params.put("platenum","34343");
+        //params.put("file","");
 
+        System.out.println("请求参数：" + params.toJSONString());
+
+        // 利用 RestUtil 请求该url
+        ResponseEntity<JSONObject> result = RestUtil.request(url, method, headers, null, params.toJSONString(), JSONObject.class);
+        if (result != null && result.getBody() != null) {
+            System.out.println("返回结果：" + result.getBody().toJSONString());
+        } else {
+            System.out.println("查询失败");
+        }
+    }
+
+    /**
+     * 测试用例：查询列表
+     */
+    @Test
+    public void testlist() {
+        // 用户Token
+        String token = this.getToken();
+        // 请求地址
+        String url = BASE_URL + "list" ;
+        // 请求 Header （用于传递Token）
+        HttpHeaders headers = this.getHeaders(token);
+        // 请求方式是 POST 代表提交新增数据
+        HttpMethod method = HttpMethod.POST;
+
+        System.out.println("请求地址：" + url);
+        System.out.println("请求方式：" + method);
+        System.out.println("请求Token：" + token);
+
+        JSONObject params = new JSONObject();
+        params.put("status", "1");
+        params.put("pageNo","1");
+        params.put("pageSize","10");
 
         System.out.println("请求参数：" + params.toJSONString());
 
