@@ -3,6 +3,7 @@ package org.jeecg.modules.activiti.web;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.activiti.engine.RuntimeService;
@@ -19,10 +20,7 @@ import org.jeecg.modules.activiti.service.Impl.ActBusinessServiceImpl;
 import org.jeecg.modules.activiti.service.Impl.ActZprocessServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
@@ -52,21 +50,21 @@ public class ActBusinessController {
     ISysBaseAPI sysBaseAPI;
     /*添加申请草稿状态*/
     @RequestMapping(value = "/add", method = RequestMethod.POST)
-    public Result add(HttpServletRequest request){
-        String procDefId = request.getParameter("procDefId");
-        String procDeTitle = request.getParameter("procDeTitle");
-        String tableName = request.getParameter("tableName");
+    public Result add(@RequestBody JSONObject jsonObject){
+        String procDefId = jsonObject.getString("procDefId");
+        String procDeTitle = jsonObject.getString("procDeTitle");
+        String tableName = jsonObject.getString("tableName");
         /*保存业务表单数据到数据库表*/
         String tableId = IdUtil.simpleUUID();
-        actBusinessService.saveApplyForm(tableId,request);
+        actBusinessService.saveApplyForm(tableId,jsonObject);
         // 保存至我的申请业务
         LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
         String username = sysUser.getUsername();
         ActBusiness actBusiness = new ActBusiness();
         actBusiness.setUserId(username);
         actBusiness.setTableId(tableId);
-        actBusiness.setProcDefId(procDefId);
-        String title = request.getParameter(ActivitiConstant.titleKey);
+        actBusiness.setProcDefId(jsonObject.getString("procDefId"));
+        String title = jsonObject.getString(ActivitiConstant.titleKey);
         if (StrUtil.isNotBlank(title)){
             actBusiness.setTitle(title);
         }else {
@@ -93,7 +91,7 @@ public class ActBusinessController {
     public Result editForm(HttpServletRequest request){
         /*保存业务表单数据到数据库表*/
         String tableId = request.getParameter("id");
-        actBusinessService.saveApplyForm(tableId,request);
+        //actBusinessService.saveApplyForm(tableId,request);
         return Result.ok();
     }
     /*通过id删除草稿状态申请*/
@@ -112,32 +110,32 @@ public class ActBusinessController {
         return Result.ok("删除成功");
     }
     /*提交申请 启动流程*/
-//    @RequestMapping(value = "/apply", method = RequestMethod.POST)
-//    public Result apply(ActBusiness act){
-//
-//        ActBusiness actBusiness = actBusinessService.getById(act.getId());
-//        if(actBusiness==null){
-//            return Result.error("actBusiness表中该id不存在");
-//        }
-//        String tableId = actBusiness.getTableId();
-//        String tableName = actBusiness.getTableName();
-//        act.setTableId(tableId);
-//        Map<String, Object> busiData = actBusinessService.getBaseMapper().getBusiData(tableId, tableName);
-//
-//        if (MapUtil.isNotEmpty(busiData)&&busiData.get(ActivitiConstant.titleKey)!=null){
-//            //如果表单里有 标题  更新一下
-//            actBusiness.setTitle(busiData.get(ActivitiConstant.titleKey)+"");
-//        }
-//        String processInstanceId = actZprocessService.startProcess(act);
-//        actBusiness.setProcInstId(processInstanceId);
-//        actBusiness.setStatus(ActivitiConstant.STATUS_DEALING);
-//        actBusiness.setResult(ActivitiConstant.RESULT_DEALING);
-//        actBusiness.setApplyTime(new Date());
-//        actBusinessService.updateById(actBusiness);
-//        //修改业务表的流程字段
-//        actBusinessService.updateBusinessStatus(actBusiness.getTableName(), actBusiness.getTableId(),"启动");
-//        return Result.ok("操作成功");
-//    }
+    @RequestMapping(value = "/apply", method = RequestMethod.POST)
+    public Result apply(@RequestBody ActBusiness act){
+
+        ActBusiness actBusiness = actBusinessService.getById(act.getId());
+        if(actBusiness==null){
+            return Result.error("actBusiness表中该id不存在");
+        }
+        String tableId = actBusiness.getTableId();
+        String tableName = actBusiness.getTableName();
+        act.setTableId(tableId);
+        Map<String, Object> busiData = actBusinessService.getBaseMapper().getBusiData(tableId, tableName);
+
+        if (MapUtil.isNotEmpty(busiData)&&busiData.get(ActivitiConstant.titleKey)!=null){
+            //如果表单里有 标题  更新一下
+            actBusiness.setTitle(busiData.get(ActivitiConstant.titleKey)+"");
+        }
+        String processInstanceId = actZprocessService.startProcess(act);
+        actBusiness.setProcInstId(processInstanceId);
+        actBusiness.setStatus(ActivitiConstant.STATUS_DEALING);
+        actBusiness.setResult(ActivitiConstant.RESULT_DEALING);
+        actBusiness.setApplyTime(new Date());
+        actBusinessService.updateById(actBusiness);
+        //修改业务表的流程字段
+        actBusinessService.updateBusinessStatus(actBusiness.getTableName(), actBusiness.getTableId(),"启动");
+        return Result.ok("操作成功");
+    }
     /*撤回申请*/
     @RequestMapping(value = "/cancel", method = RequestMethod.POST)
     public Result<Object> cancel(@RequestParam String id,

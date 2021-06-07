@@ -19,6 +19,8 @@ import org.activiti.engine.impl.pvm.process.ActivityImpl;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.apache.shiro.SecurityUtils;
+import org.jeecg.common.api.dto.message.MessageDTO;
+import org.jeecg.common.api.dto.message.TemplateDTO;
 import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.common.system.api.ISysBaseAPI;
 import org.jeecg.common.system.vo.LoginUser;
@@ -106,60 +108,60 @@ public class ActZprocessServiceImpl extends ServiceImpl<ActZprocessMapper, ActZp
         return null;
     }
 
-//    public String startProcess(ActBusiness actBusiness) {
-//        LoginUser loginUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
-//        // 启动流程用户
-//        identityService.setAuthenticatedUserId(loginUser.getUsername());
-//        // 启动流程 需传入业务表id变量
-//        Map<String, Object> params = actBusiness.getParams();
-//        params.put("tableId", actBusiness.getTableId());
-//        ActBusiness act = actBusinessService.getById(actBusiness.getId());
-//        String tableName = act.getTableName();
-//        String tableId = act.getTableId();
-//        if (StrUtil.isBlank(tableId)||StrUtil.isBlank(tableName)){
-//            throw new JeecgBootException("没有业务表单数据");
-//        }
-//        /*表单数据写入*/
-//        Map<String, Object> busiData = actBusinessService.getBaseMapper().getBusiData(tableId, tableName);
-//        for (String key : busiData.keySet()) {
-//            params.put(key,busiData.get(key));
-//        }
-//        ProcessInstance pi = runtimeService.startProcessInstanceById(actBusiness.getProcDefId(), actBusiness.getId(), params);
-//        // 设置流程实例名称
-//        runtimeService.setProcessInstanceName(pi.getId(), actBusiness.getTitle());
-//        List<Task> tasks = taskService.createTaskQuery().processInstanceId(pi.getId()).list();
-//        for(Task task : tasks){
-//            if(actBusiness.getFirstGateway()){
-//                // 网关类型
-//                List<LoginUser> users = getNode(task.getTaskDefinitionKey()).getUsers();
-//                // 如果下个节点未分配审批人为空 取消结束流程
-//                if(users==null||users.size()==0){
-//                    throw new RuntimeException("任务节点未分配任何候选审批人，发起流程失败");
-//                }else{
-//                    // 分配了节点负责人分发给全部
-//                    for(LoginUser user : users){
-//                        taskService.addCandidateUser(task.getId(), user.getUsername());
-//                        // 异步发消息
-//                        sendActMessage(loginUser,user,actBusiness,task.getName(), actBusiness.getSendMessage(),
-//                                actBusiness.getSendSms(), actBusiness.getSendEmail());
-//                    }
-//                }
-//            }else {
-//                // 分配第一个任务用户
-//                String assignees = actBusiness.getAssignees();
-//                for (String assignee : assignees.split(",")) {
-//                    taskService.addCandidateUser(task.getId(), assignee);
-//                    // 异步发消息
-//                    LoginUser user = sysBaseAPI.getUserByName(assignee);
-//                    sendActMessage(loginUser,user,actBusiness,task.getName(), actBusiness.getSendMessage(),
-//                            actBusiness.getSendSms(), actBusiness.getSendEmail());
-//                }
-//            }
-//            // 设置任务优先级
-//            taskService.setPriority(task.getId(), actBusiness.getPriority());
-//        }
-//        return pi.getId();
-//    }
+    public String startProcess(ActBusiness actBusiness) {
+        LoginUser loginUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
+        // 启动流程用户
+        identityService.setAuthenticatedUserId(loginUser.getUsername());
+        // 启动流程 需传入业务表id变量
+        Map<String, Object> params = actBusiness.getParams();
+        params.put("tableId", actBusiness.getTableId());
+        ActBusiness act = actBusinessService.getById(actBusiness.getId());
+        String tableName = act.getTableName();
+        String tableId = act.getTableId();
+        if (StrUtil.isBlank(tableId)||StrUtil.isBlank(tableName)){
+            throw new JeecgBootException("没有业务表单数据");
+        }
+        /*表单数据写入*/
+        Map<String, Object> busiData = actBusinessService.getBaseMapper().getBusiData(tableId, tableName);
+        for (String key : busiData.keySet()) {
+            params.put(key,busiData.get(key));
+        }
+        ProcessInstance pi = runtimeService.startProcessInstanceById(actBusiness.getProcDefId(), actBusiness.getId(), params);
+        // 设置流程实例名称
+        runtimeService.setProcessInstanceName(pi.getId(), actBusiness.getTitle());
+        List<Task> tasks = taskService.createTaskQuery().processInstanceId(pi.getId()).list();
+        for(Task task : tasks){
+            if(actBusiness.getFirstGateway()){
+                // 网关类型
+                List<LoginUser> users = getNode(task.getTaskDefinitionKey()).getUsers();
+                // 如果下个节点未分配审批人为空 取消结束流程
+                if(users==null||users.size()==0){
+                    throw new RuntimeException("任务节点未分配任何候选审批人，发起流程失败");
+                }else{
+                    // 分配了节点负责人分发给全部
+                    for(LoginUser user : users){
+                        taskService.addCandidateUser(task.getId(), user.getUsername());
+                        // 异步发消息
+                        sendActMessage(loginUser,user,actBusiness,task.getName(), actBusiness.getSendMessage(),
+                                actBusiness.getSendSms(), actBusiness.getSendEmail());
+                    }
+                }
+            }else {
+                // 分配第一个任务用户
+                String assignees = actBusiness.getAssignees();
+                for (String assignee : assignees.split(",")) {
+                    taskService.addCandidateUser(task.getId(), assignee);
+                    // 异步发消息
+                    LoginUser user = sysBaseAPI.getUserByName(assignee);
+                    sendActMessage(loginUser,user,actBusiness,task.getName(), actBusiness.getSendMessage(),
+                            actBusiness.getSendSms(), actBusiness.getSendEmail());
+                }
+            }
+            // 设置任务优先级
+            taskService.setPriority(task.getId(), actBusiness.getPriority());
+        }
+        return pi.getId();
+    }
 
     /**
      * 发送流程信息
@@ -171,21 +173,21 @@ public class ActZprocessServiceImpl extends ServiceImpl<ActZprocessMapper, ActZp
      * @param sendSms 短信消息
      * @param sendEmail 邮件消息
      */
-//    public void sendActMessage(LoginUser fromUser, LoginUser toUser, ActBusiness act, String taskName, Boolean sendMessage, Boolean sendSms, Boolean sendEmail) {
-//        String title = String.format("您有一个新的审批任务");
-//        Map<String, String> msgMap = Maps.newHashMap();
-//                        /*流程名称：  ${bpm_name}
-//催办任务：  ${bpm_task}
-//催办时间 :    ${datetime}
-//催办内容 :    ${remark}*/
-//        msgMap.put("bpm_name",act.getTitle());
-//        msgMap.put("bpm_task",taskName);
-//        msgMap.put("datetime", DateUtils.now());
-//        msgMap.put("remark", "请进入待办栏，尽快处理！");
-//        /*流程催办模板*/
-//        String msgText = sysBaseAPI.parseTemplateByCode("bpm_cuiban", msgMap);
-//        this.sendMessage(fromUser,toUser,title,msgText,sendMessage,sendSms,sendEmail);
-//    }
+    public void sendActMessage(LoginUser fromUser, LoginUser toUser, ActBusiness act, String taskName, Boolean sendMessage, Boolean sendSms, Boolean sendEmail) {
+        String title = String.format("您有一个新的审批任务");
+        Map<String, String> msgMap = Maps.newHashMap();
+                        /*流程名称：  ${bpm_name}
+催办任务：  ${bpm_task}
+催办时间 :    ${datetime}
+催办内容 :    ${remark}*/
+        msgMap.put("bpm_name",act.getTitle());
+        msgMap.put("bpm_task",taskName);
+        msgMap.put("datetime", DateUtils.now());
+        msgMap.put("remark", "请进入待办栏，尽快处理！");
+        /*流程催办模板*/
+        String msgText = sysBaseAPI.parseTemplateByCode(new TemplateDTO("bpm_cuiban",msgMap));
+        this.sendMessage(fromUser,toUser,title,msgText,sendMessage,sendSms,sendEmail);
+    }
 
     /**
      * 发消息
@@ -197,25 +199,25 @@ public class ActZprocessServiceImpl extends ServiceImpl<ActZprocessMapper, ActZp
      * @param sendSms 短信
      * @param sendEmail 邮件
      */
-//    public void sendMessage(LoginUser fromUser, LoginUser toUser,String title,String msgText,  Boolean sendMessage, Boolean sendSms, Boolean sendEmail) {
-//        if (sendMessage!=null&&sendMessage){
-//            sysBaseAPI.sendSysAnnouncement(fromUser.getUsername(),toUser.getUsername(),title,msgText);
-//        }
-//        //todo 以下需要购买阿里短信服务；设定邮件服务账号
-//        if (sendSms!=null&&sendSms&& StrUtil.isNotBlank(toUser.getPhone())){
-//            //DySmsHelper.sendSms(toUser.getPhone(), obj, DySmsEnum.REGISTER_TEMPLATE_CODE)
-//        }
-//        if (sendEmail!=null&&sendEmail&& StrUtil.isNotBlank(toUser.getEmail())){
-//            JavaMailSender mailSender = (JavaMailSender) SpringContextUtils.getBean("mailSender");
-//            SimpleMailMessage message = new SimpleMailMessage();
-//// 设置发送方邮箱地址
-////            message.setFrom(emailFrom);
-//            message.setTo(toUser.getEmail());
-//            //message.setSubject(es_title);
-//            message.setText(msgText);
-//            mailSender.send(message);
-//        }
-//    }
+    public void sendMessage(LoginUser fromUser, LoginUser toUser,String title,String msgText,  Boolean sendMessage, Boolean sendSms, Boolean sendEmail) {
+        if (sendMessage!=null&&sendMessage){
+            sysBaseAPI.sendSysAnnouncement(new MessageDTO(fromUser.getUsername(),toUser.getUsername(),title,msgText));
+        }
+        //todo 以下需要购买阿里短信服务；设定邮件服务账号
+        if (sendSms!=null&&sendSms&& StrUtil.isNotBlank(toUser.getPhone())){
+            //DySmsHelper.sendSms(toUser.getPhone(), obj, DySmsEnum.REGISTER_TEMPLATE_CODE)
+        }
+        if (sendEmail!=null&&sendEmail&& StrUtil.isNotBlank(toUser.getEmail())){
+            JavaMailSender mailSender = (JavaMailSender) SpringContextUtils.getBean("mailSender");
+            SimpleMailMessage message = new SimpleMailMessage();
+// 设置发送方邮箱地址
+//            message.setFrom(emailFrom);
+            message.setTo(toUser.getEmail());
+            //message.setSubject(es_title);
+            message.setText(msgText);
+            mailSender.send(message);
+        }
+    }
 
     public ProcessNodeVo getNode(String nodeId) {
 

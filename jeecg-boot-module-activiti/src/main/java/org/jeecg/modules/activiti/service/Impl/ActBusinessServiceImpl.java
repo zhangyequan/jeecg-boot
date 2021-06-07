@@ -1,6 +1,7 @@
 package org.jeecg.modules.activiti.service.Impl;
 
 import cn.hutool.core.map.MapUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.jeecg.modules.activiti.entity.ActBusiness;
@@ -28,9 +29,9 @@ public class ActBusinessServiceImpl extends ServiceImpl<ActBusinessMapper, ActBu
      * <br>该方法相对通用，复杂业务单独定制，套路类似
      * @param tableId 业务表中的数据id
      * */
-    public void saveApplyForm(String tableId, HttpServletRequest request) {
-        String tableName = request.getParameter("tableName");
-        String filedNames = request.getParameter("filedNames");
+    public void saveApplyForm(String tableId, JSONObject jsonObject ) {
+        String tableName = jsonObject.getString("tableName");
+        String filedNames = jsonObject.getString("filedNames");
         Map<String, Object> busiData = this.baseMapper.getBusiData(tableId, tableName);
         String[] fileds = filedNames.split(",");
         if (MapUtil.isEmpty(busiData)){ //没有，新增逻辑
@@ -38,13 +39,13 @@ public class ActBusinessServiceImpl extends ServiceImpl<ActBusinessMapper, ActBu
             StringBuilder filedsVB = new StringBuilder("'"+tableId+"'");
             for (String filed : fileds) {
                 filedsB.append(","+filed);
-                filedsVB.append(",'"+request.getParameter(filed)+"'");
+                filedsVB.append(",'"+jsonObject.getString(filed)+"'");
             }
             this.baseMapper.insertBusiData(String.format("INSERT INTO %s (%s) VALUES (%s)",tableName,filedsB.toString(),filedsVB.toString()));
         }else { //有，修改
             StringBuilder setSql = new StringBuilder();
             for (String filed : fileds) {
-                String parameter = request.getParameter(filed);
+                String parameter = jsonObject.getString(filed);
                 if (parameter==null){
                     setSql.append(String.format("%s = null,",filed));
                 }else {

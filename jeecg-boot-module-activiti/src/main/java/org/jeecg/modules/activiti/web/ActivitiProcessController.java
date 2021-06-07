@@ -57,12 +57,10 @@ public class ActivitiProcessController {
     private ActBusinessServiceImpl actBusinessService;
 
     @RequestMapping("/listData")
-    public Result listData( HttpServletRequest request){
+    public Result listData(@RequestParam(value = "status",required = false) String status,@RequestParam(value = "roles",required = false) String roles,
+                           @RequestParam(value = "lcmc",required = false) String lcmc,@RequestParam(value = "lckey",required = false) String lckey,
+                           @RequestParam(value = "zx",required = false) String zx){
         log.info("-------------流程列表-------------");
-        String lcmc = request.getParameter("lcmc");
-        String lckey = request.getParameter("lckey");
-        String zx = request.getParameter("zx");
-        String status = request.getParameter("status");
         LambdaQueryWrapper<ActZprocess> wrapper = new LambdaQueryWrapper<ActZprocess>();
         wrapper.orderByAsc(ActZprocess::getProcessKey).orderByDesc(ActZprocess::getVersion);
         if (StrUtil.isNotBlank(lcmc)){
@@ -78,15 +76,15 @@ public class ActivitiProcessController {
             wrapper.eq(ActZprocess::getStatus, status);
         }
         List<ActZprocess> list = actZprocessService.list(wrapper);
-        if (StrUtil.isNotBlank(request.getParameter("roles"))){ //过滤角色
+        if (StrUtil.isNotBlank(roles)){ //过滤角色
             LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
             List<String> roleByUserName = actNodeService.getRoleByUserName(sysUser.getUsername());
             list = list.stream().filter(p->{
-                String roles = p.getRoles();
-                if (StrUtil.isBlank(roles)) {
+                String roles2 = p.getRoles();
+                if (StrUtil.isBlank(roles2)) {
                     return true; //未设置授权的所有人都能用
                 }else {
-                    String[] split = roles.split(",");
+                    String[] split = roles2.split(",");
                     for (String role : split) {
                         if (roleByUserName.contains(role)){
                             return true;
@@ -102,7 +100,7 @@ public class ActivitiProcessController {
 
     /*激活或挂起流程定义*/
     @RequestMapping(value = "/updateStatus")
-    public Result updateStatus( String id, Integer status){
+    public Result updateStatus( @RequestParam(name = "id", required = true) String id, @RequestParam(name = "status", required = true) Integer status){
 
         ActZprocess actProcess = actZprocessService.getById(id);
         if(status==1){
@@ -193,7 +191,7 @@ public class ActivitiProcessController {
         return Result.ok("修改成功");
     }
     @RequestMapping(value = "/updateInfo", method = RequestMethod.POST)
-    public Result<Object> updateInfo(ActZprocess actProcess){
+    public Result<Object> updateInfo(@RequestBody ActZprocess actProcess){
 
         ProcessDefinition pd = repositoryService.getProcessDefinition(actProcess.getId());
         if(pd==null){
@@ -263,7 +261,7 @@ public class ActivitiProcessController {
      * @param chooseDepHeader 是否勾选操作人的部门负责人
      * @return
      */
-    @RequestMapping(value = "/editNodeUser", method = RequestMethod.POST)
+    @GetMapping(value = "/editNodeUser")
     public Result editNodeUser(String nodeId, String userIds, String roleIds, String departmentIds, Boolean chooseDepHeader, Boolean chooseSponsor){
 
         // 删除其关联权限
