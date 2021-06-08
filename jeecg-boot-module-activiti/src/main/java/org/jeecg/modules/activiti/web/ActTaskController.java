@@ -417,70 +417,70 @@ public class ActTaskController {
 
     }
     /*已办列表*/
-//    @RequestMapping(value = "/doneList")
-//    public Result<Object> doneList(String name,
-//                                   String categoryId,
-//                                   Integer priority,
-//                                   HttpServletRequest req){
-//
-//        List<HistoricTaskVo> list = new ArrayList<>();
-//        LoginUser loginUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
-//        String userId = loginUser.getUsername();
-//        HistoricTaskInstanceQuery query = historyService.createHistoricTaskInstanceQuery().or().taskCandidateUser(userId).
-//                taskAssignee(userId).endOr().finished();
-//
-//        // 多条件搜索
-//        query.orderByTaskCreateTime().desc();
-//        if(StrUtil.isNotBlank(name)){
-//            query.taskNameLike("%"+name+"%");
-//        }
-//        if(StrUtil.isNotBlank(categoryId)){
-//            query.taskCategory(categoryId);
-//        }
-//        if(priority!=null){
-//            query.taskPriority(priority);
-//        }
-//        List<HistoricTaskInstance> taskList = query.list();
-//        // 转换vo
-//        List<ComboModel> allUser = sysBaseAPI.queryAllUser();
-//        Map<String, String> userMap = allUser.stream().collect(Collectors.toMap(ComboModel::getUsername, ComboModel::getTitle));
-//        taskList.forEach(e -> {
-//            HistoricTaskVo htv = new HistoricTaskVo(e);
-//            // 关联委托人
-//            if(StrUtil.isNotBlank(htv.getOwner())){
-//                htv.setOwner(userMap.get(htv.getOwner()));
-//            }
-//            List<HistoricIdentityLink> identityLinks = historyService.getHistoricIdentityLinksForProcessInstance(htv.getProcInstId());
-//            for(HistoricIdentityLink hik : identityLinks){
-//                // 关联发起人
-//                if("starter".equals(hik.getType())&&StrUtil.isNotBlank(hik.getUserId())){
-//                    htv.setApplyer(userMap.get(hik.getUserId()));
-//                }
-//            }
-//            // 关联审批意见
-//            List<Comment> comments = taskService.getTaskComments(htv.getId(), "comment");
-//            if(comments!=null&&comments.size()>0){
-//                htv.setComment(comments.get(0).getFullMessage());
-//            }
-//            // 关联流程信息
-//            ActZprocess actProcess = actZprocessService.getById(htv.getProcDefId());
-//            if(actProcess!=null){
-//                htv.setProcessName(actProcess.getName());
-//                htv.setRouteName(actProcess.getRouteName());
-//            }
-//            // 关联业务key
-//            HistoricProcessInstance hpi = historyService.createHistoricProcessInstanceQuery().processInstanceId(htv.getProcInstId()).singleResult();
-//            htv.setBusinessKey(hpi.getBusinessKey());
-//            ActBusiness actBusiness = actBusinessService.getById(hpi.getBusinessKey());
-//            if(actBusiness!=null){
-//                htv.setTableId(actBusiness.getTableId());
-//                htv.setTableName(actBusiness.getTableName());
-//            }
-//
-//            list.add(htv);
-//        });
-//        return Result.ok(list);
-//    }
+    @RequestMapping(value = "/doneList")
+    public Result<Object> doneList(String name,
+                                   String categoryId,
+                                   Integer priority,
+                                   HttpServletRequest req){
+
+        List<HistoricTaskVo> list = new ArrayList<>();
+        LoginUser loginUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
+        String userId = loginUser.getUsername();
+        HistoricTaskInstanceQuery query = historyService.createHistoricTaskInstanceQuery().or().taskCandidateUser(userId).
+                taskAssignee(userId).endOr().finished();
+
+        // 多条件搜索
+        query.orderByTaskCreateTime().desc();
+        if(StrUtil.isNotBlank(name)){
+            query.taskNameLike("%"+name+"%");
+        }
+        if(StrUtil.isNotBlank(categoryId)){
+            query.taskCategory(categoryId);
+        }
+        if(priority!=null){
+            query.taskPriority(priority);
+        }
+        List<HistoricTaskInstance> taskList = query.list();
+        // 转换vo
+        List<ComboModel> allUser = (List<ComboModel>) (sysBaseAPI.queryAllUser("",1,10)).get("list");
+        Map<String, String> userMap = allUser.stream().collect(Collectors.toMap(ComboModel::getUsername, ComboModel::getTitle));
+        taskList.forEach(e -> {
+            HistoricTaskVo htv = new HistoricTaskVo(e);
+            // 关联委托人
+            if(StrUtil.isNotBlank(htv.getOwner())){
+                htv.setOwner(userMap.get(htv.getOwner()));
+            }
+            List<HistoricIdentityLink> identityLinks = historyService.getHistoricIdentityLinksForProcessInstance(htv.getProcInstId());
+            for(HistoricIdentityLink hik : identityLinks){
+                // 关联发起人
+                if("starter".equals(hik.getType())&&StrUtil.isNotBlank(hik.getUserId())){
+                    htv.setApplyer(userMap.get(hik.getUserId()));
+                }
+            }
+            // 关联审批意见
+            List<Comment> comments = taskService.getTaskComments(htv.getId(), "comment");
+            if(comments!=null&&comments.size()>0){
+                htv.setComment(comments.get(0).getFullMessage());
+            }
+            // 关联流程信息
+            ActZprocess actProcess = actZprocessService.getById(htv.getProcDefId());
+            if(actProcess!=null){
+                htv.setProcessName(actProcess.getName());
+                htv.setRouteName(actProcess.getRouteName());
+            }
+            // 关联业务key
+            HistoricProcessInstance hpi = historyService.createHistoricProcessInstanceQuery().processInstanceId(htv.getProcInstId()).singleResult();
+            htv.setBusinessKey(hpi.getBusinessKey());
+            ActBusiness actBusiness = actBusinessService.getById(hpi.getBusinessKey());
+            if(actBusiness!=null){
+                htv.setTableId(actBusiness.getTableId());
+                htv.setTableName(actBusiness.getTableName());
+            }
+
+            list.add(htv);
+        });
+        return Result.ok(list);
+    }
     /*删除任务历史*/
     @RequestMapping(value = "/deleteHistoric/{ids}", method = RequestMethod.POST)
     public Result<Object> deleteHistoric( @PathVariable String ids){
