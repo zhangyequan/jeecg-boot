@@ -168,4 +168,6 @@ public class Visitinfo2Controller extends JeecgController<Visitinfo2, IVisitinfo
         return super.importExcel(request, response, Visitinfo2.class);
     }
 
+
+
 }
